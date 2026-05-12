@@ -1,0 +1,131 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <set>
+using namespace std;
+
+// Goal State
+vector<vector<int>> goal = {
+    {1, 2, 3},
+    {4, 5, 6},
+    {7, 8, 0}
+};
+
+// Structure for Puzzle State
+struct Node {
+    vector<vector<int>> mat;
+    int x, y; // Position of blank space (0)
+    int level;
+};
+
+// Check if current state is goal state
+bool isGoal(vector<vector<int>> mat) {
+    return mat == goal;
+}
+
+// Print Puzzle
+void printMatrix(vector<vector<int>> mat) {
+    for (auto row : mat) {
+        for (auto val : row) {
+            cout << val << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
+// Convert matrix into string for visited set
+string matrixToString(vector<vector<int>> mat) {
+    string s = "";
+
+    for (auto row : mat) {
+        for (auto val : row) {
+            s += to_string(val);
+        }
+    }
+
+    return s;
+}
+
+// BFS for 8 Puzzle
+void solvePuzzle(vector<vector<int>> start, int x, int y) {
+
+    queue<Node> q;
+    set<string> visited;
+
+    q.push({start, x, y, 0});
+
+    visited.insert(matrixToString(start));
+
+    // Possible moves
+    int dx[] = {-1, 1, 0, 0};
+    int dy[] = {0, 0, -1, 1};
+
+    while (!q.empty()) {
+
+        Node curr = q.front();
+        q.pop();
+
+        // Goal State Found
+        if (isGoal(curr.mat)) {
+
+            cout << "Goal State Reached\n\n";
+
+            printMatrix(curr.mat);
+
+            cout << "Moves Required = "
+                 << curr.level;
+
+            return;
+        }
+
+        // Try all 4 moves
+        for (int i = 0; i < 4; i++) {
+
+            int newX = curr.x + dx[i];
+            int newY = curr.y + dy[i];
+
+            // Check valid move
+            if (newX >= 0 && newX < 3 &&
+                newY >= 0 && newY < 3) {
+
+                vector<vector<int>> newMat = curr.mat;
+
+                swap(newMat[curr.x][curr.y],
+                     newMat[newX][newY]);
+
+                string state = matrixToString(newMat);
+
+                // If state not visited
+                if (visited.find(state) == visited.end()) {
+
+                    visited.insert(state);
+
+                    q.push({newMat,
+                            newX,
+                            newY,
+                            curr.level + 1});
+                }
+            }
+        }
+    }
+
+    cout << "No Solution Exists";
+}
+
+int main() {
+
+    vector<vector<int>> start = {
+        {1, 2, 3},
+        {4, 0, 6},
+        {7, 5, 8}
+    };
+
+    // Position of 0
+    int x = 1;
+    int y = 1;
+
+    solvePuzzle(start, x, y);
+
+    return 0;
+}
